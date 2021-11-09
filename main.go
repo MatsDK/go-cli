@@ -5,11 +5,12 @@ import(
 	"os"
 	"log"
 	"flag"
+	D "./lib"
 )
 
 func main() {
 	if len(os.Args) <  2 {
-		fmt.Println("off | on | set")
+		fmt.Println("off | on | set | preset")
 		return
 	}
 
@@ -37,6 +38,23 @@ func main() {
 			}
 
 			fmt.Printf("set brightness: %d, red: %d, green: %d, blue: %d\n", *brightnessFlag, *rFlag, *gFlag, *bFlag)
+		case "preset":
+			db := D.ConnectDB()	
+
+			rows, err := db.Query("SELECT * FROM preset;")
+			if err != nil {
+				panic(err)
+			}
+
+			for rows.Next() {
+				var name string
+				rows.Scan(&name)
+
+				fmt.Println(name)
+
+			}
+
+			fmt.Println("preset")
 		case "on":
 			fmt.Println("on")
 		case "off":
