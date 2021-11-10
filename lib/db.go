@@ -3,7 +3,7 @@ package db
 import (
 	"fmt"
 	"database/sql"
-
+	"log"
 	  _ "github.com/lib/pq"
 )
 
@@ -23,8 +23,17 @@ func ConnectDB() *sql.DB {
 	if err != nil {
 		  panic(err)
 	}
-	//defer db.Close()
 
 	return db
+}
+
+func Query(query string, db *sql.DB) *sql.Rows {
+	rows, err := db.Query(query)
+	if err != nil {
+		fmt.Println("SQL select error: ")
+		log.Fatal(err)
+	}
+
+	return rows
 }
 
