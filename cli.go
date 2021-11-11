@@ -19,6 +19,8 @@ type Preset struct {
 }
 
 func main() {
+	c := D.Controller{}
+
 	if len(os.Args) < 2 {
 		fmt.Println("off | on | set | preset")
 		return
@@ -41,7 +43,8 @@ func main() {
 
 				if len(preset.Name) != 0 {
 					if preset.Mode == "static" {
-						setStatic(preset.Brightness, preset.Red, preset.Green, preset.Blue)
+						c.SetStaticColor(preset.Brightness, preset.Red,
+							preset.Green, preset.Blue)
 					}
 				}
 			}
@@ -68,7 +71,7 @@ func main() {
 				*bFlag = 255
 			}
 
-			setStatic(*brightnessFlag, *rFlag, *gFlag, *bFlag)
+			c.SetStaticColor(*brightnessFlag, *rFlag, *gFlag, *bFlag)
 		}
 	case "preset":
 		if len(os.Args) <= 2 {
@@ -88,17 +91,14 @@ func main() {
 	}
 }
 
-func setStatic(brightness int, red int, green int, blue int) {
-	fmt.Printf("set brightness: %d, red: %d, green: %d, blue: %d\n", brightness, red, green, blue)
-}
-
 func getPresetByName(presetName string) Preset {
 	query := fmt.Sprintf("SELECT name, mode, brightness, red, green, blue FROM preset WHERE name='%s';", presetName)
 	rows := D.Query(query, D.ConnectDB())
 
-	rows.Next()
 	var name, mode string
 	var brightness, red, green, blue int
+
+	rows.Next()
 	rows.Scan(&name, &mode, &brightness, &red, &green, &blue)
 
 	return Preset{Name: name, Mode: mode, Brightness: brightness, Red: red, Green: green, Blue: blue}
@@ -137,7 +137,6 @@ func handlePreset(cmd string) {
 		if *modeFlag == "static" {
 			query := fmt.Sprintf("INSERT INTO preset(name, mode, brightness, red, green, blue) VALUES('%s', '%s', %d, %d, %d, %d);",
 				*nameFlag, *modeFlag, *brightnessFlag, *rFlag, *gFlag, *bFlag)
-
 			D.Query(query, D.ConnectDB())
 		}
 
