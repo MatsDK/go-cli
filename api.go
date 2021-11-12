@@ -20,10 +20,16 @@ type Preset struct {
 }
 
 func getPresets(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	var presets []Preset
 
 	query := fmt.Sprintf("SELECT name, mode, brightness, red, green, blue FROM preset;")
-	rows := D.Query(query, D.ConnectDB())
+	rows, err := D.Query(query, D.ConnectDB())
+
+	if err != nil {
+		json.NewEncoder(w).Encode(nil)
+		return
+	}
 
 	for rows.Next() {
 		var name, mode string
@@ -33,7 +39,6 @@ func getPresets(w http.ResponseWriter, r *http.Request) {
 		presets = append(presets, Preset{Name: name, Mode: mode, Brightness: brightness, Red: red, Green: green, Blue: blue})
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(presets)
 }
 
@@ -43,7 +48,48 @@ func getPreset(w http.ResponseWriter, r *http.Request) {
 	presetName := params["name"]
 
 	query := fmt.Sprintf("SELECT name, mode, brightness, red, green, blue FROM preset WHERE name='%s';", presetName)
-	rows := D.Query(query, D.ConnectDB())
+	rows, err := D.Query(query, D.ConnectDB())
+
+	if err != nil {
+		json.NewEncoder(w).Encode(nil)
+		return
+	}
+
+	var name, mode string
+	var brightness, red, green, blue, counter int
+	for rows.Next() {
+		rows.Scan(&name, &mode, &brightness, &red, &green, &blue)
+		counter++
+	}
+
+	if counter == 0 {
+		json.NewEncoder(w).Encode(nil)
+		return
+	}
+
+	json.NewEncoder(w).Encode(Preset{Name: name, Mode: mode, Brightness: brightness, Red: red, Green: green, Blue: blue})
+}
+
+func createPreset(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	var p Preset
+
+	err := json.NewDecoder(r.Body).Decode(&p)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	query := fmt.Sprintf("INSERT INTO preset(name, mode, brightness, red, green, blue) VALUES('%s', '%s', %d, %d, %d, %d) RETURNING name, mode, brightness, red, green, blue; ",
+		p.Name, p.Mode, p.Brightness, p.Red, p.Green, p.Blue,
+	)
+	rows, err := D.Query(query, D.ConnectDB())
+
+	if err != nil {
+		json.NewEncoder(w).Encode(nil)
+		return
+	}
 
 	var name, mode string
 	var brightness, red, green, blue, counter int
@@ -65,6 +111,7 @@ func main() {
 
 	r.HandleFunc("/api/presets", getPresets).Methods("GET")
 	r.HandleFunc("/api/presets/{name}", getPreset).Methods("GET")
+	r.HandleFunc("/api/presets", createPreset).Methods("POST")
 
 	err := http.ListenAndServe(":8000", r)
 	if err != nil {

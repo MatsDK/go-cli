@@ -93,7 +93,11 @@ func main() {
 
 func getPresetByName(presetName string) Preset {
 	query := fmt.Sprintf("SELECT name, mode, brightness, red, green, blue FROM preset WHERE name='%s';", presetName)
-	rows := D.Query(query, D.ConnectDB())
+	rows, err := D.Query(query, D.ConnectDB())
+
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	var name, mode string
 	var brightness, red, green, blue int
@@ -107,7 +111,12 @@ func getPresetByName(presetName string) Preset {
 func handlePreset(cmd string) {
 	switch cmd {
 	case "list":
-		rows := D.Query("SELECT name FROM preset;", D.ConnectDB())
+		rows, err := D.Query("SELECT name FROM preset;", D.ConnectDB())
+
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
 
 		for rows.Next() {
 			var name string
