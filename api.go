@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	D "./lib"
 	"github.com/gorilla/mux"
@@ -123,13 +124,70 @@ func deletePreset(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(true)
 }
 
+func setPreset(c *D.Controller) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		params := mux.Vars(r)
+		presetName := params["name"]
+
+		query := fmt.Sprintf("SELECT name, mode, brightness, red, green, blue FROM preset WHERE name='%s'",
+			presetName,
+		)
+		rows, err := D.Query(query, D.ConnectDB())
+
+		if err != nil {
+			json.NewEncoder(w).Encode(err.Error())
+			return
+		}
+
+		var name, mode string
+		var brightness, red, green, blue, counter int
+		for rows.Next() {
+			rows.Scan(&name, &mode, &brightness, &red, &green, &blue)
+			counter++
+		}
+
+		if counter == 0 {
+			json.NewEncoder(w).Encode(nil)
+			return
+		}
+
+		if mode == "static" {
+			c.SetStaticColor(brightness, red, green, blue)
+		}
+
+		json.NewEncoder(w).Encode(true)
+	}
+}
+
+func setBrigthness(c *D.Controller) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		params := mux.Vars(r)
+
+		brightness, err := strconv.Atoi(params["value"])
+		if err != nil {
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+
+		c.SetBrightness(&brightness)
+
+		json.NewEncoder(w).Encode(true)
+	}
+}
+
 func main() {
 	r := mux.NewRouter()
+	c := D.Controller{}
 
 	r.HandleFunc("/api/presets", getPresets).Methods("GET")
 	r.HandleFunc("/api/presets/{name}", getPreset).Methods("GET")
 	r.HandleFunc("/api/presets", createPreset).Methods("POST")
 	r.HandleFunc("/api/presets/{name}", deletePreset).Methods("DELETE")
+
+	r.HandleFunc("/api/set/preset/{name}", setPreset(&c)).Methods("POST")
+	r.HandleFunc("/api/set/brightness/{value}", setBrigthness(&c)).Methods("POST")
 
 	err := http.ListenAndServe(":8000", r)
 	if err != nil {
