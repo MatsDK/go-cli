@@ -3,7 +3,6 @@ package lib
 import (
 	"database/sql"
 	"fmt"
-	"log"
 
 	_ "github.com/lib/pq"
 )
@@ -31,8 +30,7 @@ func ConnectDB() *sql.DB {
 func Query(query string, db *sql.DB) (*sql.Rows, error) {
 	rows, err := db.Query(query)
 	if err != nil {
-		fmt.Println("SQL select error: ")
-		log.Fatal(err)
+		fmt.Println(err.Error())
 		return nil, err
 	}
 

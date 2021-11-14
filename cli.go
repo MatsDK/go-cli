@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	D "./lib"
 )
@@ -49,6 +50,18 @@ func main() {
 				}
 			}
 
+		} else if os.Args[2] == "brightness" {
+			if len(os.Args) < 4 {
+				log.Fatal("You have to provide a brightness value")
+			}
+
+			brightness, err := strconv.Atoi(os.Args[3])
+			if err != nil {
+				log.Fatal(err.Error())
+				os.Exit(2)
+			}
+
+			c.SetBrightness(&brightness)
 		} else {
 			setCmd := flag.NewFlagSet("set", flag.ExitOnError)
 			brightnessFlag := setCmd.Int("brightness", 100, "the brightness")
@@ -87,7 +100,6 @@ func main() {
 		fmt.Println("off")
 	default:
 		fmt.Println("off | on | set")
-
 	}
 }
 

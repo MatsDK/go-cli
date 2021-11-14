@@ -106,12 +106,30 @@ func createPreset(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(Preset{Name: name, Mode: mode, Brightness: brightness, Red: red, Green: green, Blue: blue})
 }
 
+func deletePreset(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	params := mux.Vars(r)
+	presetName := params["name"]
+
+	query := fmt.Sprintf("DELETE FROM preset WHERE name='%s'",
+		presetName,
+	)
+	if _, err := D.Query(query, D.ConnectDB()); err != nil {
+		json.NewEncoder(w).Encode(nil)
+		return
+	}
+
+	json.NewEncoder(w).Encode(true)
+}
+
 func main() {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/api/presets", getPresets).Methods("GET")
 	r.HandleFunc("/api/presets/{name}", getPreset).Methods("GET")
 	r.HandleFunc("/api/presets", createPreset).Methods("POST")
+	r.HandleFunc("/api/presets/{name}", deletePreset).Methods("DELETE")
 
 	err := http.ListenAndServe(":8000", r)
 	if err != nil {
