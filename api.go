@@ -172,20 +172,38 @@ func setBrigthness(c *D.Controller) func(http.ResponseWriter, *http.Request) {
 		}
 
 		c.SetBrightness(&brightness)
+		json.NewEncoder(w).Encode(true)
+	}
+}
+
+func setColor(c *D.Controller) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		var p Preset
+
+		err := json.NewDecoder(r.Body).Decode(&p)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		if p.Mode == "static" {
+			c.SetStaticColor(p.Brightness, p.Red, p.Green, p.Blue)
+		}
 
 		json.NewEncoder(w).Encode(true)
 	}
 }
 
 func main() {
-	r := mux.NewRouter()
-	c := D.Controller{}
+	r, c := mux.NewRouter(), D.Controller{}
 
 	r.HandleFunc("/api/presets", getPresets).Methods("GET")
 	r.HandleFunc("/api/presets/{name}", getPreset).Methods("GET")
 	r.HandleFunc("/api/presets", createPreset).Methods("POST")
 	r.HandleFunc("/api/presets/{name}", deletePreset).Methods("DELETE")
 
+	r.HandleFunc("/api/set", setColor(&c)).Methods("POST")
 	r.HandleFunc("/api/set/preset/{name}", setPreset(&c)).Methods("POST")
 	r.HandleFunc("/api/set/brightness/{value}", setBrigthness(&c)).Methods("POST")
 

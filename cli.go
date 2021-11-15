@@ -95,7 +95,7 @@ func main() {
 		presetCmd := os.Args[2]
 		handlePreset(presetCmd)
 	case "on":
-		fmt.Println("on")
+		c.SetOff()
 	case "off":
 		fmt.Println("off")
 	default:
