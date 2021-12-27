@@ -65,9 +65,9 @@ func main() {
 		} else {
 			setCmd := flag.NewFlagSet("set", flag.ExitOnError)
 			brightnessFlag := setCmd.Int("brightness", 100, "the brightness")
-			rFlag := setCmd.Int("r", -1, "the red color")
-			gFlag := setCmd.Int("g", -1, "the green color")
-			bFlag := setCmd.Int("b", -1, "the blue color")
+			rFlag := setCmd.Int("r", 0, "the red color")
+			gFlag := setCmd.Int("g", 0, "the green color")
+			bFlag := setCmd.Int("b", 0, "the blue color")
 			err := setCmd.Parse(os.Args[2:])
 
 			if err != nil {
@@ -95,9 +95,9 @@ func main() {
 		presetCmd := os.Args[2]
 		handlePreset(presetCmd)
 	case "on":
-		c.SetOff()
+		c.SetOn()
 	case "off":
-		fmt.Println("off")
+		c.SetOff()
 	default:
 		fmt.Println("off | on | set")
 	}

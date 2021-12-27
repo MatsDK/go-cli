@@ -16,3 +16,7 @@ func (c *Controller) SetStaticColor(brightness int, red int, green int, blue int
 func (c *Controller) SetOff() {
 	fmt.Println("Turn off")
 }
+
+func (c *Controller) SetOn() {
+	fmt.Println("Turn on")
+}
