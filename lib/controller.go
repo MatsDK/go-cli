@@ -1,6 +1,14 @@
 package lib
 
-import "fmt"
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"log"
+	"net/http"
+)
+
+const BASE_URL = "http://192.168.0.164:5000"
 
 type Controller struct {
 }
@@ -10,7 +18,21 @@ func (c *Controller) SetBrightness(brightness *int) {
 }
 
 func (c *Controller) SetStaticColor(brightness int, red int, green int, blue int) {
+	const postURL = BASE_URL + "/setStaticColor"
 	fmt.Printf("set brightness: %d, red: %d, green: %d, blue: %d\n", brightness, red, green, blue)
+
+	postBody, _ := json.Marshal(map[string]int{
+		"r": red,
+		"g": green,
+		"b": blue,
+	})
+
+	responseBody := bytes.NewBuffer(postBody)
+	_, err := http.Post(postURL, "application/json", responseBody)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (c *Controller) SetOff() {

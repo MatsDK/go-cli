@@ -19,8 +19,8 @@ def colorWipe(strip, color, wait_ms=50):
 def setColor(strip, color ):
     for i in range(strip.numPixels()):
         strip.setPixelColor(i, color)
-        time.sleep(20 / 1000.0)
-        strip.show()
+        # time.sleep(20 / 1000.0)
+        # strip.show()
     strip.show()
 
 strip = PixelStrip(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL)
