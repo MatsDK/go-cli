@@ -33,12 +33,29 @@ func (c *Controller) SetStaticColor(brightness int, red int, green int, blue int
 	if err != nil {
 		log.Fatal(err)
 	}
+
 }
 
 func (c *Controller) SetOff() {
 	fmt.Println("Turn off")
+	const postURL = BASE_URL + "/off"
+
+	postBody, _ := json.Marshal(map[string]int{})
+	responseBody := bytes.NewBuffer(postBody)
+	_, err := http.Post(postURL, "application/json", responseBody)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (c *Controller) SetOn() {
 	fmt.Println("Turn on")
+	const postURL = BASE_URL + "/on"
+
+	postBody, _ := json.Marshal(map[string]int{})
+	responseBody := bytes.NewBuffer(postBody)
+	_, err := http.Post(postURL, "application/json", responseBody)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
