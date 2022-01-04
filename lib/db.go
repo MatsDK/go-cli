@@ -12,7 +12,7 @@ const (
 	port     int    = 5432
 	user     string = "postgres"
 	password string = "mats"
-	dbname   string = "go-cli"
+	dbname   string = "go_led"
 )
 
 func ConnectDB() *sql.DB {

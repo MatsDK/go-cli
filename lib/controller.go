@@ -35,11 +35,22 @@ func (c *Controller) SetStaticColor(brightness int, red int, green int, blue int
 	}
 
 }
+func (c *Controller) SetMode(mode string) {
+	fmt.Printf("Set mode %s\n", mode)
+	postBody, _ := json.Marshal(map[string]string{
+		"mode": mode,
+	})
 
-func (c *Controller) SetOff() {
-	fmt.Println("Turn off")
-	const postURL = BASE_URL + "/off"
+	responseBody := bytes.NewBuffer(postBody)
+	const postURL = BASE_URL + "/setMode"
+	_, err := http.Post(postURL, "application/json", responseBody)
 
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func post(postURL string) {
 	postBody, _ := json.Marshal(map[string]int{})
 	responseBody := bytes.NewBuffer(postBody)
 	_, err := http.Post(postURL, "application/json", responseBody)
@@ -48,14 +59,12 @@ func (c *Controller) SetOff() {
 	}
 }
 
+func (c *Controller) SetOff() {
+	fmt.Println("Turn off")
+	post(BASE_URL + "/off")
+}
+
 func (c *Controller) SetOn() {
 	fmt.Println("Turn on")
-	const postURL = BASE_URL + "/on"
-
-	postBody, _ := json.Marshal(map[string]int{})
-	responseBody := bytes.NewBuffer(postBody)
-	_, err := http.Post(postURL, "application/json", responseBody)
-	if err != nil {
-		log.Fatal(err)
-	}
+	post(BASE_URL + "/on")
 }

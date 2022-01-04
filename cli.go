@@ -62,6 +62,13 @@ func main() {
 			}
 
 			c.SetBrightness(&brightness)
+		} else if os.Args[2] == "mode" {
+			if len(os.Args) <= 3 {
+				fmt.Println("rainbow | ")
+				return
+			}
+
+			c.SetMode(os.Args[3])
 		} else {
 			setCmd := flag.NewFlagSet("set", flag.ExitOnError)
 			brightnessFlag := setCmd.Int("brightness", 100, "the brightness")
